@@ -21,7 +21,7 @@ class Node:
         return self.est_total_cost == other.est_total_cost
 
 
-def search(map_obj: MapObj, heuristic):
+def search(map_obj: MapObj, heuristic, moving_goal=False):
     node = Node(
         state=map_obj.start_pos,
         parent=None,
@@ -35,6 +35,8 @@ def search(map_obj: MapObj, heuristic):
     reached = [node.state]
 
     while len(frontier) > 0:
+        if moving_goal:
+            map_obj.tick()
         node = heappop(frontier)
 
         for child_node in expand(map_obj, node, heuristic):
