@@ -1,3 +1,5 @@
+from enum import Enum
+
 import numpy as np
 import time
 import pandas as pd
@@ -6,7 +8,13 @@ from PIL import Image
 np.set_printoptions(threshold=np.inf, linewidth=300)
 
 
-class MapObj():
+class Actions(Enum):
+    TOP = 1
+    RIGHT = 2
+    BOTTOM = 3
+    LEFT = 4
+
+class MapObj:
     def __init__(self, task=1):
         self.start_pos, self.goal_pos, self.end_goal_pos, self.path_to_map = self.fill_critical_positions(
             task)
@@ -93,6 +101,41 @@ class MapObj():
     def get_maps(self):
         # Return the map in both int and string format
         return self.int_map, self.str_map
+
+    def is_goal(self, pos):
+        return self.end_goal_pos[0] == pos[0] and self.end_goal_pos[1] == pos[1]
+
+    def get_actions(self, pos):
+        actions = []
+        for _ in range(4):
+            try:
+                if self.get_cell_value([pos[0] + 1, pos[1]]) != -1:
+                    actions.append(Actions.RIGHT)
+                if self.get_cell_value([pos[0] - 1, pos[1]]) != -1:
+                    actions.append(Actions.LEFT)
+                if self.get_cell_value([pos[0], pos[1] + 1]) != -1:
+                    actions.append(Actions.TOP)
+                if self.get_cell_value([pos[0], pos[1] - 1]) != -1:
+                    actions.append(Actions.BOTTOM)
+            except IndexError:
+                pass
+        return actions
+
+    def get_result(self, pos, action):
+        if action == Actions.RIGHT:
+            return [pos[0] + 1, pos[1]]
+        if action == Actions.LEFT:
+            return [pos[0] - 1, pos[1]]
+        if action == Actions.TOP:
+            return [pos[0], pos[1] + 1]
+        if action == Actions.BOTTOM:
+            return [pos[0], pos[1] - 1]
+
+    def draw_path(self, node):
+        node = node.parent
+        while node.parent is not None:
+            self.str_map[node.state[0], node.state[1]] = ' P '
+            node = node.parent
 
     def move_goal_pos(self, pos):
         """
@@ -230,7 +273,8 @@ class MapObj():
             ' : ': (96, 96, 96),
             ' ; ': (36, 36, 36),
             ' S ': (255, 0, 255),
-            ' G ': (0, 128, 255)
+            ' G ': (0, 128, 255),
+            ' P ': (0, 200, 0)
         }
         # Go through image and set pixel color for every position
         for y in range(height):
