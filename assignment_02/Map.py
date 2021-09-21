@@ -1,18 +1,19 @@
 from enum import Enum
 
 import numpy as np
-import time
 import pandas as pd
 from PIL import Image
 
 np.set_printoptions(threshold=np.inf, linewidth=300)
 
 
+# Actions enum comprising the possible actions that may be performed at a given cell
 class Actions(Enum):
     TOP = 1
     RIGHT = 2
     BOTTOM = 3
     LEFT = 4
+
 
 class MapObj:
     def __init__(self, task=1):
@@ -103,6 +104,12 @@ class MapObj:
         return self.int_map, self.str_map
 
     def is_goal(self, pos):
+        """
+        Determines if the given position corresponds to the goal or not.
+
+        :param pos: (x, y) coordinates of the cell that should be checked
+        :return: true if the position corresponds to the goal, false in all other cases
+        """
         return self.end_goal_pos[0] == pos[0] and self.end_goal_pos[1] == pos[1]
 
     def get_actions(self, pos):
@@ -121,7 +128,15 @@ class MapObj:
                 pass
         return actions
 
-    def get_result(self, pos, action):
+    def get_result(self, pos, action: Actions):
+        """
+        Returns the coordinates of the cell based on the execution
+        of the given action.
+
+        :param pos: (x, y) coordinates of the cell from which the action is performed
+        :param action: The action to be executed, i.e., LEFT, RIGHT, TOP, or BOTTOM
+        :return: coordinates of the adjacent cell based on the given action
+        """
         if action == Actions.RIGHT:
             return [pos[0] + 1, pos[1]]
         if action == Actions.LEFT:
@@ -132,6 +147,16 @@ class MapObj:
             return [pos[0], pos[1] - 1]
 
     def draw_path(self, node):
+        """
+        Iterates over all the nodes that are on the path from the
+        starting position to the goal by calling node.parent
+        recursively from the node on the goal to the node at the
+        starting position. With each iteration, the corresponding
+        position at the string map is replaced with ' P ' to
+        paint the cell in a different color.
+
+        :param node: node returned by the A-star algorithm
+        """
         node = node.parent
         while node.parent is not None:
             self.str_map[node.state[0], node.state[1]] = ' P '
@@ -274,7 +299,7 @@ class MapObj:
             ' ; ': (36, 36, 36),
             ' S ': (255, 0, 255),
             ' G ': (0, 128, 255),
-            ' P ': (0, 200, 0)
+            ' P ': (0, 200, 0)  # added a color for the path cell
         }
         # Go through image and set pixel color for every position
         for y in range(height):
