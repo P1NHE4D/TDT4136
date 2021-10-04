@@ -138,7 +138,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
-
+        # finding the optimal move for pacman by calling max_value first using the current state
         val, move = self.max_value(state=gameState)
         return move
 
@@ -152,7 +152,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         v, move = -math.inf, -math.inf
 
-        # find the optimal possible action for max (i.e., pacman)
+        # find the optimal possible action for max (i.e., pacman) based on the moves by the ghosts
         for action in state.getLegalActions(0):
             v2, a2 = self.min_value(state.generateSuccessor(0, action), current_depth)
             if v2 > v:
@@ -169,7 +169,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         v, move = math.inf, math.inf
 
-        # find the optimal possible move for min (i.e., a ghost)
+        # find the optimal possible move for min (i.e., a ghost) based on the moves by pacman
         for action in state.getLegalActions(current_agent):
             # if the next agent is a ghost, call min_value
             if next_agent != 0:
@@ -214,7 +214,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         v, move = -math.inf, -math.inf
 
-        # find optimal possible action for max (i.e., pacman)
+        # find optimal possible action for max (i.e., pacman) based on the moves by the ghosts
         for action in state.getLegalActions(0):
             v2, a2 = self.min_value(
                 state=state.generateSuccessor(0, action),
@@ -241,7 +241,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         v, move = math.inf, math.inf
 
-        # find optimal possible action for min (i.e., one of the ghosts)
+        # find optimal possible action for min (i.e., one of the ghosts) based on the moves by pacman
         for action in state.getLegalActions(current_agent):
             # if the next agent is not pacman, call min
             if next_agent != 0:
