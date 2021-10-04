@@ -139,15 +139,20 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
 
-        val, move = self.max_value(state=gameState, current_depth=0)
+        val, move = self.max_value(state=gameState)
         return move
 
-    def max_value(self, state, current_depth):
+    def max_value(self, state, current_depth=0):
+        # depth increases each time pacman needs to move
         current_depth += 1
+
+        # check if terminal state is reached
         if current_depth > self.depth or state.isWin() or state.isLose():
             return self.evaluationFunction(state), None
 
         v, move = -math.inf, -math.inf
+
+        # find the optimal possible action for max (i.e., pacman)
         for action in state.getLegalActions(0):
             v2, a2 = self.min_value(state.generateSuccessor(0, action), current_depth)
             if v2 > v:
@@ -155,19 +160,25 @@ class MinimaxAgent(MultiAgentSearchAgent):
         return v, move
 
     def min_value(self, state, current_depth, current_agent=1):
+        # check if terminal state is reached
         if state.isLose() or state.isWin():
             return self.evaluationFunction(state), None
 
+        # determine the index of the next agent based on total number of agents
         next_agent = (current_agent + 1) % state.getNumAgents()
+
         v, move = math.inf, math.inf
 
+        # find the optimal possible move for min (i.e., a ghost)
         for action in state.getLegalActions(current_agent):
+            # if the next agent is a ghost, call min_value
             if next_agent != 0:
                 v2, a2 = self.min_value(
                     state=state.generateSuccessor(current_agent, action),
                     current_depth=current_depth,
                     current_agent=next_agent
                 )
+            # if the next agent is pacman, call max_value
             else:
                 v2, a2 = self.max_value(
                     state=state.generateSuccessor(current_agent, action),
@@ -188,15 +199,22 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        val, move = self.max_value(state=gameState, alpha=-math.inf, beta=math.inf, current_depth=0)
+        # compared to Minimax, the code did not change substantially
+        # except for the addition of the alpha and beta parameters
+        val, move = self.max_value(state=gameState, alpha=-math.inf, beta=math.inf)
         return move
 
-    def max_value(self, state, alpha, beta, current_depth):
+    def max_value(self, state, alpha, beta, current_depth=0):
+        # the depth increases each time pacman needs to make a move
         current_depth += 1
+
+        # determine if a terminal state is reached
         if current_depth > self.depth or state.isWin() or state.isLose():
             return self.evaluationFunction(state), None
 
         v, move = -math.inf, -math.inf
+
+        # find optimal possible action for max (i.e., pacman)
         for action in state.getLegalActions(0):
             v2, a2 = self.min_value(
                 state=state.generateSuccessor(0, action),
@@ -206,19 +224,26 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             )
             if v2 > v:
                 v, move = v2, action
+                # alpha value corresponds to the best possible value for max
                 alpha = max(alpha, v)
+            # stop if beta is smaller than v, because min will never enter this part of the tree
             if v > beta:
                 return v, action
         return v, move
 
     def min_value(self, state, current_depth, alpha, beta, current_agent=1):
+        # determine if a terminal state is reached
         if state.isLose() or state.isWin():
             return self.evaluationFunction(state), None
 
+        # compute the index of the next agent based on the total number of agents
         next_agent = (current_agent + 1) % state.getNumAgents()
+
         v, move = math.inf, math.inf
 
+        # find optimal possible action for min (i.e., one of the ghosts)
         for action in state.getLegalActions(current_agent):
+            # if the next agent is not pacman, call min
             if next_agent != 0:
                 v2, a2 = self.min_value(
                     state=state.generateSuccessor(current_agent, action),
@@ -227,6 +252,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     current_depth=current_depth,
                     current_agent=next_agent
                 )
+            # if the next agent is pacman, call max
             else:
                 v2, a2 = self.max_value(
                     state=state.generateSuccessor(current_agent, action),
@@ -237,7 +263,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
             if v2 < v:
                 v, move = v2, action
+                # the beta value corresponds to the least possible value
                 beta = min(v, beta)
+            # if v is smaller than alpha, prune the tree, because max will never enter this part of the branch
             if v < alpha:
                 return v, action
         return v, move
