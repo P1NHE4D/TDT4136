@@ -1,5 +1,6 @@
 import copy
 import itertools
+import math
 
 
 class CSP:
@@ -169,12 +170,13 @@ class CSP:
         in 'assignment' that have not yet been decided, i.e. whose list
         of legal values has a length greater than one.
         """
+        var, mrv = math.inf, math.inf
         for k, v in assignment.items():
 
             # return the first variable with no assignments, i.e., more than a single value
-            if len(v) > 1:
-                return k
-        return None
+            if 1 < len(v) < mrv:
+                var, mrv = k, len(v)
+        return var
 
     def inference(self, assignment, queue: list):
         """The function 'AC-3' from the pseudocode in the textbook.
