@@ -129,6 +129,8 @@ class CSP:
         assignments and inferences that took place in previous
         iterations of the loop.
         """
+        # track the number of backtracking calls
+        self.backtracking_calls += 1
 
         # check if the assignment is complete or not
         if self.assignment_complete(assignment):
@@ -156,6 +158,9 @@ class CSP:
                 # solution to the preceding backtracking calls
                 if res:
                     return res
+
+        # track the number of failues
+        self.failure_count += 1
         return None
 
     def select_unassigned_variable(self, assignment):
@@ -305,7 +310,10 @@ def main():
     for file in files:
         csp = create_sudoku_csp(file)
         res = csp.backtracking_search()
-        print("Solution for {}:".format(file))
+        print("{}:".format(file))
+        print("Backtracking calls: {}".format(csp.backtracking_calls))
+        print("Number of failures: {}".format(csp.failure_count))
+        print("Solution:")
         print_sudoku_solution(res)
         print("")
 
